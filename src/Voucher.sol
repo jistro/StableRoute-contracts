@@ -24,12 +24,12 @@ contract Voucher {
     error NotTheSudoAccount();
     error NotYetTimeToAcceptProposal();
 
-    uint256 private voucherIdCounter;
     address private usdc;
     address private tokenMessenger;
     AddressTypeProposal private sudoAccount;
     mapping(address => bool) private hasAdmin;
-    mapping(uint256 => VoucherMetaData) private vouchers;
+
+    VoucherMetaData[] private vouchers;
 
     modifier onlyAdmin() {
         if (!isAdmin(msg.sender)) {
@@ -62,25 +62,26 @@ contract Voucher {
         address recipient,
         uint256 amount
     ) external onlyAdmin returns (uint256) {
-        voucherIdCounter++;
-
-        vouchers[voucherIdCounter] = VoucherMetaData({
+        vouchers.push(VoucherMetaData({
             name: name,
             nationality: nationality,
             recipient: recipient,
             amount: amount,
             isRedeemed: false
-        });
+        }));
 
-        return voucherIdCounter;
+        return vouchers.length - 1; // Return the index of the newly created voucher
     }
 
     function redeemVoucher(
         uint256 voucherId,
         uint32 destinationDomain
     ) external onlyAdmin {
+        if (!thisVoucherExists(voucherId)) {
+            revert VoucherDoesNotExist();
+        }
+
         VoucherMetaData memory voucher = vouchers[voucherId];
-        
         if (isVoucherRedeemed(voucherId)) {
             revert AlreadyRedeemed();
         }
@@ -150,14 +151,17 @@ contract Voucher {
         usdc = newUsdc;
     }
 
-    function getVoucherInfo(
+    function getVouchers() external view returns (VoucherMetaData[] memory) {
+        return vouchers;
+    }
+
+    function getVoucherById(
         uint256 voucherId
     ) external view returns (VoucherMetaData memory) {
-        VoucherMetaData memory voucher = vouchers[voucherId];
-        if (voucher.recipient == address(0)) {
+        if (!thisVoucherExists(voucherId)) {
             revert VoucherDoesNotExist();
         }
-        return voucher;
+        return vouchers[voucherId];
     }
 
     function getSudoInfo()
@@ -183,13 +187,14 @@ contract Voucher {
     function isVoucherRedeemed(
         uint256 voucherId
     ) public view returns (bool) {
-        VoucherMetaData memory voucher = vouchers[voucherId];
-        if (voucher.recipient == address(0)) {
-            revert VoucherDoesNotExist();
-        }
-        return voucher.isRedeemed;
+        return vouchers[voucherId].isRedeemed;
     }
 
+    function thisVoucherExists(
+        uint256 voucherId
+    ) public view returns (bool) {
+        return voucherId < vouchers.length && vouchers[voucherId].recipient != address(0);
+    }
 
 }
 
