@@ -52,9 +52,6 @@ contract Vault {
     }
 
     function sendToVoucher(uint256 amount) external {
-        if (amount > IERC20(usdc).balanceOf(msg.sender)) {
-            revert InsufficientUSDCBalance();
-        }
 
         /// @dev approve usdc for the token messenge
         IERC20(usdc).approve(tokenMessenger, amount);

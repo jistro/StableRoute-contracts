@@ -176,6 +176,6 @@ contract Voucher {
     }
 
     function getUSDCAmount() external view returns (uint256) {
-        return IERC20(usdc).balanceOf(msg.sender);
+        return IERC20(usdc).balanceOf(address(this));
     }
 }
