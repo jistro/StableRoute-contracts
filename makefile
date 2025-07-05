@@ -17,7 +17,7 @@ compile:
 
 deploy: 
 	@echo "Deploying testnet"
-	@forge script script/L2Registrar.s.sol:L2RegistrarScript $(ARB_SEPOLIA_TESTNET_ARGS) -vvvv
+	@forge script script/Voucher.s.sol:VoucherScript $(ARB_SEPOLIA_TESTNET_ARGS) -vvvv
 
 
 

@@ -18,6 +18,11 @@ contract Voucher {
         bool isRedeemed;
     }
 
+    error AlreadyRedeemed();
+    error VoucherDoesNotExist();
+    error NotAnAdmin();
+    error NotTheSudoAccount();
+    error NotYetTimeToAcceptProposal();
 
     uint256 private voucherIdCounter;
     address private usdc;
@@ -25,26 +30,22 @@ contract Voucher {
     AddressTypeProposal private sudoAccount;
     mapping(address => bool) private hasAdmin;
     mapping(uint256 => VoucherMetaData) private vouchers;
-    
+
     modifier onlyAdmin() {
-        if (!hasAdmin[msg.sender]) {
-            revert("Not an admin");
+        if (!isAdmin(msg.sender)) {
+            revert NotAnAdmin();
         }
         _;
     }
 
     modifier onlySudo() {
         if (msg.sender != sudoAccount.actual) {
-            revert("Not the sudo account");
+            revert NotTheSudoAccount();
         }
         _;
     }
 
-    constructor(
-        address _usdc,
-        address _tokenMessenger,
-        address _sudoAccount
-    ) {
+    constructor(address _usdc, address _tokenMessenger, address _sudoAccount) {
         usdc = _usdc;
         tokenMessenger = _tokenMessenger;
         sudoAccount = AddressTypeProposal({
@@ -74,23 +75,22 @@ contract Voucher {
         return voucherIdCounter;
     }
 
-
     function redeemVoucher(
         uint256 voucherId,
         uint32 destinationDomain
-    ) external onlyAdmin returns (uint256) {
+    ) external onlyAdmin {
         VoucherMetaData memory voucher = vouchers[voucherId];
-        if (voucher.recipient == address(0)) {
-            revert("Voucher does not exist");
-        }
         
+        if (isVoucherRedeemed(voucherId)) {
+            revert AlreadyRedeemed();
+        }
+
         if (destinationDomain == 3) {
             /// @dev because CCTP's destinationDomain is 3 for ARB we send it directly to the recipient
             IERC20(usdc).transfer(voucher.recipient, voucher.amount);
-            
         } else {
             /// @dev for other domains, use the token messenger to burn and mint
-            
+
             /// @dev approve usdc for the token messenger
             IERC20(usdc).approve(tokenMessenger, voucher.amount);
 
@@ -107,7 +107,6 @@ contract Voucher {
         }
 
         voucher.isRedeemed = true;
-
     }
 
     function makeSudoAccountProposal(address newSudoAccount) external onlySudo {
@@ -121,8 +120,9 @@ contract Voucher {
     }
 
     function acceptSudoAccountProposal() external onlySudo {
-        if (block.timestamp < sudoAccount.timeToAccept)
-            revert("Not yet time to accept proposal");
+        if (block.timestamp < sudoAccount.timeToAccept) {
+            revert NotYetTimeToAcceptProposal();
+        }
         sudoAccount = AddressTypeProposal({
             actual: sudoAccount.proposal,
             proposal: address(0),
@@ -149,6 +149,48 @@ contract Voucher {
     function changeUsdcAddress(address newUsdc) external onlySudo {
         usdc = newUsdc;
     }
+
+    function getVoucherInfo(
+        uint256 voucherId
+    ) external view returns (VoucherMetaData memory) {
+        VoucherMetaData memory voucher = vouchers[voucherId];
+        if (voucher.recipient == address(0)) {
+            revert VoucherDoesNotExist();
+        }
+        return voucher;
+    }
+
+    function getSudoInfo()
+        external
+        view
+        returns (
+            address actual,
+            address proposal,
+            uint256 timeToAccept
+        )
+    {
+        return (
+            sudoAccount.actual,
+            sudoAccount.proposal,
+            sudoAccount.timeToAccept
+        );
+    }
+
+    function isAdmin(address account) public view returns (bool) {
+        return hasAdmin[account];
+    }
+
+    function isVoucherRedeemed(
+        uint256 voucherId
+    ) public view returns (bool) {
+        VoucherMetaData memory voucher = vouchers[voucherId];
+        if (voucher.recipient == address(0)) {
+            revert VoucherDoesNotExist();
+        }
+        return voucher.isRedeemed;
+    }
+
+
 }
 
 interface ITokenMessengerV2 {
