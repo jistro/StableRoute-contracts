@@ -3,6 +3,7 @@
 .PHONY: all install compile anvil help
 
 ARB_SEPOLIA_TESTNET_ARGS := --rpc-url $(RPC_URL_ARB_SEPOLIA) --account defaultKey --broadcast --verify --verifier-url "https://api-sepolia.arbiscan.io/api" --etherscan-api-key $(ARBISCAN_API) -vvvv
+BASE_SEPOLIA_TESTNET_ARGS := --rpc-url $(RPC_URL_BASE_SEPOLIA) --account defaultKey --broadcast --verify --verifier-url "https://api-sepolia.basescan.org/api" --etherscan-api-key $(BASESCAN_API) -vvvv
 
 # Main commands
 all: clean remove install update build 
@@ -15,11 +16,13 @@ install:
 compile:
 	@forge b --via-ir --sizes
 
-deploy: 
+deployVoucher: 
 	@echo "Deploying testnet"
 	@forge script script/Voucher.s.sol:VoucherScript $(ARB_SEPOLIA_TESTNET_ARGS) -vvvv
 
-
+deployVault: 
+	@echo "Deploying Vault contract"
+	@forge script script/Vault.s.sol:VaultScript $(BASE_SEPOLIA_TESTNET_ARGS) -vvvv
 
 
 # Other commands

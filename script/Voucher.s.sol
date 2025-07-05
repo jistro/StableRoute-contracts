@@ -8,7 +8,6 @@ contract VoucherScript is Script {
     Voucher public voucher;
 
     address constant USDC = 0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d;
-    address constant TOKEN_MESSENGER = 0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA;
     address constant SUDO_ACCOUNT = 0x5cBf2D4Bbf834912Ad0bD59980355b57695e8309;
 
     function setUp() public {}
@@ -18,7 +17,6 @@ contract VoucherScript is Script {
 
         voucher = new Voucher(
             USDC,
-            TOKEN_MESSENGER,
             SUDO_ACCOUNT
         );
         
