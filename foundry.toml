@@ -2,5 +2,11 @@
 src = "src"
 out = "out"
 libs = ["lib"]
+remappings = [
+    '@stableRoute/interface/=src/interface/',
+    '@ensdomains/ens-contracts/=node_modules/@ensdomains/ens-contracts/contracts/',
+    '@ensdomains/ens-contracts/resolvers/=node_modules/@ensdomains/ens-contracts/contracts/resolvers/',
+    '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
 
+]
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

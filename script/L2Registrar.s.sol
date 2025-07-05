@@ -2,17 +2,17 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
-import {Counter} from "../src/Counter.sol";
+import {L2Registrar} from "../src/L2Registrar.sol";
 
-contract CounterScript is Script {
-    Counter public counter;
+contract L2RegistrarScript is Script {
+    L2Registrar public registrar;
 
     function setUp() public {}
 
     function run() public {
         vm.startBroadcast();
 
-        counter = new Counter();
+        registrar = new L2Registrar(0x1035E9A680F6A7bF051C72e42DE70dB297bDB970);
 
         vm.stopBroadcast();
     }
