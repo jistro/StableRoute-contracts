@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ensdomains/ens-contracts": "^1.5.2"
+    "@ensdomains/ens-contracts": "^1.5.2",
+    "@selfxyz/contracts": "^1.2.0"
   }
 }
