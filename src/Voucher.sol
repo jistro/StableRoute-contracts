@@ -84,19 +84,22 @@ contract Voucher {
             revert NotTheRedeemAccount();
         }
 
-        VoucherMetaData memory voucher = vouchers[voucherId];
-
         if (isVoucherRedeemed(voucherId)) {
             revert AlreadyRedeemed();
         }
 
-        if (voucher.amount > IERC20(usdc).balanceOf(address(this))) {
+        if (
+            vouchers[voucherId].amount > IERC20(usdc).balanceOf(address(this))
+        ) {
             revert InsufficientUSDCBalance();
         }
 
-        IERC20(usdc).transfer(voucher.recipient, voucher.amount);
+        IERC20(usdc).transfer(
+            vouchers[voucherId].recipient,
+            vouchers[voucherId].amount
+        );
 
-        voucher.isRedeemed = true;
+        vouchers[voucherId].isRedeemed = true;
     }
 
     function makeSudoAccountProposal(address newSudoAccount) external onlySudo {
