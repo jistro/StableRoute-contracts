@@ -5,11 +5,6 @@ import {SelfVerificationRoot} from "@selfxyz/contracts/contracts/abstract/SelfVe
 import {ISelfVerificationRoot} from "@selfxyz/contracts/contracts/interfaces/ISelfVerificationRoot.sol";
 import {SelfStructs} from "@selfxyz/contracts/contracts/libraries/SelfStructs.sol";
 
-/**
- * @title TestSelfVerificationRoot
- * @notice Test implementation of SelfVerificationRoot for testing purposes
- * @dev This contract provides a concrete implementation of the abstract SelfVerificationRoot
- */
 contract ProofOfHuman is SelfVerificationRoot {
     // Storage for testing purposes
     bool public verificationSuccessful;
@@ -30,12 +25,11 @@ contract ProofOfHuman is SelfVerificationRoot {
      * @param identityVerificationHubV2Address The address of the Identity Verification Hub V2
      */
     constructor(
-        address identityVerificationHubV2Address,
-        uint256 scope,
-        bytes32 _verificationConfigId
-    ) SelfVerificationRoot(identityVerificationHubV2Address, scope) {
-        verificationConfigId = _verificationConfigId;
+        address identityVerificationHubV2Address
+    ) SelfVerificationRoot(identityVerificationHubV2Address, 0) {
+        verificationConfigId = 0x7b6436b0c98f62380866d9432c2af0ee08ce16a171bda6951aecd95ee1307d61;
     }
+
     /**
      * @notice Implementation of customVerificationHook for testing
      * @dev This function is called by onVerificationSuccess after hub address validation
@@ -83,13 +77,6 @@ contract ProofOfHuman is SelfVerificationRoot {
         lastUserAddress = address(0);
     }
 
-    /**
-     * @notice Expose the internal _setScope function for testing
-     * @param newScope The new scope value to set
-     */
-    function setScope(uint256 newScope) external {
-        _setScope(newScope);
-    }
 
     function setVerificationConfig(
         SelfStructs.VerificationConfigV2 memory config
@@ -128,5 +115,17 @@ contract ProofOfHuman is SelfVerificationRoot {
     ) external {
         // This should fail if called by anyone other than the hub
         onVerificationSuccess(output, userData);
+    }
+
+    function getLastOutput()
+        external
+        view
+        returns (ISelfVerificationRoot.GenericDiscloseOutputV2 memory)
+    {
+        return lastOutput;
+    }
+
+    function setScope(uint256 _scope) external {
+        _setScope(_scope);
     }
 }
